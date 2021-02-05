@@ -2,6 +2,8 @@ import * as express from 'express';
 import Post from './post.interfaces';
 import postModel from './post.model';
 import PostException from '../exceptions/PostException';
+import createPostDto from './post.dto';
+import validationMiddleware from '../middleware/validation.middleware';
 class PostsController {
 	public path: string = '/posts';
 	public router = express.Router();
@@ -12,9 +14,9 @@ class PostsController {
 	public intializeRoutes() {
 		this.router.get(this.path, this.getAllPosts);
 		this.router.get(`${this.path}/:id`, this.getPostById);
-		this.router.patch(`${this.path}/:id`, this.modifyPost);
+		this.router.patch(`${this.path}/:id`, validationMiddleware(createPostDto, true), this.modifyPost);
 		this.router.delete(`${this.path}/:id`, this.deletePost);
-		this.router.post(this.path, this.createPost);
+		this.router.post(this.path, validationMiddleware(createPostDto), this.createPost);
 	}
 	private getAllPosts = (request: express.Request, response: express.Response) => {
 		this.post.find().then((posts) => {
