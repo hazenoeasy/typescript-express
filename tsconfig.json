@@ -2,9 +2,16 @@
   "compilerOptions": {
     "sourceMap": true,
     "target": "es5",
+    "resolveJsonModule": true,
     "outDir": "./dist",
-    "experimentalDecorators": true
+    // "rootDir": ".",
+    // "baseUrl": "./src",
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
+  "compileOnSave": true,
   "include": [
     "src/**/*.ts"
   ],
