@@ -41,7 +41,7 @@ class AuthenticationController implements Controller {
 		const LogInData: LogInDto = request.body;
 		const user = await this.user.findOne({ email: LogInData.email });
 		if (user) {
-			const isPasswordMatching = await bcrypt.compare(LogInData, user.password);
+			const isPasswordMatching = await bcrypt.compare(LogInData.password, user.password);
 			if (isPasswordMatching) {
 				user.password = undefined;
 				const tokenData = this.createToken(user);

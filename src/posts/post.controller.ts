@@ -4,6 +4,8 @@ import postModel from './post.model';
 import PostException from '../exceptions/PostException';
 import createPostDto from './post.dto';
 import validationMiddleware from '../middleware/validation.middleware';
+import authMiddleware from '../middleware/auth.middleware';
+import RequestWithUser from '../interfaces/requestWithUser.interface';
 class PostsController {
 	public path: string = '/posts';
 	public router = express.Router();
@@ -14,9 +16,12 @@ class PostsController {
 	public intializeRoutes() {
 		this.router.get(this.path, this.getAllPosts);
 		this.router.get(`${this.path}/:id`, this.getPostById);
-		this.router.patch(`${this.path}/:id`, validationMiddleware(createPostDto, true), this.modifyPost);
-		this.router.delete(`${this.path}/:id`, this.deletePost);
-		this.router.post(this.path, validationMiddleware(createPostDto), this.createPost);
+
+		this.router
+			.all(`${this.path}*`, authMiddleware) // /*只通配 /posts/xxxx
+			.patch(`${this.path}/:id`, validationMiddleware(createPostDto, true), this.modifyPost)
+			.delete(`${this.path}/:id`, this.deletePost)
+			.post(this.path, validationMiddleware(createPostDto), this.createPost);
 	}
 	private getAllPosts = (request: express.Request, response: express.Response) => {
 		this.post.find().then((posts) => {
@@ -45,14 +50,16 @@ class PostsController {
 			});
 	};
 
-	private createPost = (request: express.Request, response: express.Response) => {
-		const postData: Post = request.body;
+	private createPost = async (request: RequestWithUser, response: express.Response) => {
+		const postData: createPostDto = request.body;
 		console.log(postData);
-		const createdPost = new this.post(postData);
-		createdPost.save().then((savedPost) => {
-			response.send(savedPost);
-			console.log(savedPost);
-		});
+		const createdPost = new this.post({ ...postData, authorId: request.user._id });
+		// createdPost.save().then((savedPost) => {
+		// 	response.send(savedPost);
+		// 	console.log(savedPost);
+		// });
+		const savedPost = await createdPost.save();
+		response.send(savedPost);
 	};
 
 	private deletePost = (request: express.Request, response: express.Response, next: express.NextFunction) => {
