@@ -24,9 +24,12 @@ class PostsController {
 			.post(this.path, validationMiddleware(createPostDto), this.createPost);
 	}
 	private getAllPosts = (request: express.Request, response: express.Response) => {
-		this.post.find().then((posts) => {
-			response.send(posts);
-		});
+		this.post
+			.find()
+			.populate('author', '-password')
+			.then((posts) => {
+				response.send(posts);
+			});
 	};
 
 	private getPostById = (request: express.Request, response: express.Response, next: express.NextFunction) => {
@@ -52,13 +55,15 @@ class PostsController {
 
 	private createPost = async (request: RequestWithUser, response: express.Response) => {
 		const postData: createPostDto = request.body;
-		console.log(postData);
-		const createdPost = new this.post({ ...postData, authorId: request.user._id });
+		console.log('request:', request.user);
+		const createdPost = new this.post({ ...postData, author: request.user._id });
 		// createdPost.save().then((savedPost) => {
 		// 	response.send(savedPost);
 		// 	console.log(savedPost);
 		// });
 		const savedPost = await createdPost.save();
+		console.log('savedPost:', savedPost);
+		await savedPost.populate('author', '-password').execPopulate();
 		response.send(savedPost);
 	};
 

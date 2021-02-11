@@ -1,6 +1,6 @@
 //定义post类型
 interface Post {
-	author: string;
+	authorId: string;
 	content: string;
 	title: string;
 }

@@ -3,6 +3,10 @@ interface User {
 	email: string;
 	password: string;
 	_id: string;
+	address?: {
+		street: string;
+		city: string;
+	};
 }
 
 export default User;
